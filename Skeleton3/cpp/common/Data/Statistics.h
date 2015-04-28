@@ -36,6 +36,12 @@ public:
     void clear();
 
     /**
+     * Return a list of identifiers for all objects that are controlled by this statistics view.
+     * @return a list of identifiers for objects under the control of this statistics view.
+     */
+    QList<QString> getLinks() const;
+
+    /**
      * Return a string representing the statistics state of a particular type.
      * @param type - the type of state needed.
      * @param sessionId - an identifier for the user's session.

@@ -87,8 +87,12 @@ public:
      */
     void refreshState();
 
+    void changeChannelIndex( int index );
+
+    void changeImageIndex( int selectedImage );
+
     /**
-     * Adds a link to this animator.
+     * Removes a link to this animator.
      * @param cartaObject the link to remove.
      * @return an error message if the link could not be removed; an empty string otherwise.
      */

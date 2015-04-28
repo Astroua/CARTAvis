@@ -64,6 +64,47 @@ public:
      */
     QString setColorMap( const QString& colorMapName );
 
+    /**
+     * Reverse the current colormap.
+     * @param reverseStr Should be equal to either "true" or "false".
+     * @return error information if the color map was not successfully reversed.
+     */
+    QString reverseColormap( const QString& reverseStr );
+
+    /**
+     * Set caching for the current colormap.
+     * @param cacheSizeStr should be equal to either "true" or "false"
+     * @return error information if the cache size was not successfully set.
+     */
+    QString setCacheColormap( const QString& cacheSizeStr );
+
+    /**
+     * Set the cache size of the current colormap.
+     * @param cacheSizeStr the desired size of the cache
+     * @return error information if the cache size was not successfully set.
+     */
+    QString setCacheSize( const QString& cacheSizeStr );
+
+    /**
+     * Interpolate the current colormap.
+     * @param interpolateStr Should be equal to either "true" or "false".
+     * @return error information if the color map was not successfully reversed.
+     */
+    QString setInterpolatedColorMap( const QString& interpolateStr );
+
+    /**
+     * Invert the current colormap.
+     * @param invertStr Should be equal to either "true" or "false".
+     * @return error information if the color map was not successfully reversed.
+     */
+    QString invertColorMap( const QString& invertStr );
+
+    /**
+     * Set a color mix.
+     * @param percentString a formatted string specifying the blue, green, and red percentanges.
+     * @return error information if the color mix was successfully set.
+     */
+    QString setColorMix( const QString& percentString );
 
     /**
      * Set the name of the data transform.
@@ -78,6 +119,14 @@ public:
      * @return error information if gamma could not be set.
      */
     QString setGamma( double gamma );
+
+    /**
+     * Return a list of identifiers for all objects that are controlled by this colormap.
+     * @return a list of identifiers for objects under the control of this colormap.
+     */
+    QList<QString> getLinks() const;
+
+    std::shared_ptr<Carta::Lib::PixelPipeline::IColormapNamed> getColorMap( ) const;
 
     /**
      * Returns the selected controller for this colormap.

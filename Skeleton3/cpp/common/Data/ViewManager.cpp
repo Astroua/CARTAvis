@@ -319,7 +319,7 @@ void ViewManager::_initializeDefaultState(){
 }
 
 int ViewManager::_findColorMap( const QString& id ) const {
-    int colorCount = m_colormaps.size();
+    int colorCount = getColorMapCount();
     int colorIndex = -1;
     for ( int i = 0; i < colorCount; i++ ){
         if ( m_colormaps[i]->getPath() == id ){
@@ -330,7 +330,17 @@ int ViewManager::_findColorMap( const QString& id ) const {
     return colorIndex;
 }
 
-
+int ViewManager::_findAnimator( const QString& id ) const {
+    int animCount = getAnimatorCount();
+    int animIndex = -1;
+    for ( int i = 0; i < animCount; i++ ){
+        if ( m_animators[i]->getPath() == id ){
+            animIndex = i;
+            break;
+        }
+    }
+    return animIndex;
+}
 
 QString ViewManager::linkAdd( const QString& sourceId, const QString& destId ){
     QString result;
@@ -495,7 +505,7 @@ QString ViewManager::getObjectId( const QString& plugin, int index, bool forceCr
 }
 
 void ViewManager::loadFile( const QString& controlId, const QString& fileName){
-    int controlCount = m_controllers.size();
+    int controlCount = getControllerCount();
     for ( int i = 0; i < controlCount; i++ ){
         const QString controlPath= m_controllers[i]->getPath();
         if ( controlId  == controlPath ){
@@ -506,6 +516,49 @@ void ViewManager::loadFile( const QString& controlId, const QString& fileName){
            break;
         }
     }
+}
+
+void ViewManager::loadLocalFile( const QString& controlId, const QString& fileName){
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+           //Add the data to it
+            _makeDataLoader();
+           m_controllers[i]->addData( fileName );
+           break;
+        }
+    }
+}
+
+QString ViewManager::getFileList() {
+    QString fileList = m_dataLoader->getData("", "");
+    return fileList;
+}
+
+int ViewManager::getControllerCount() const {
+    int controllerCount = m_controllers.size();
+    return controllerCount;
+}
+
+int ViewManager::getColorMapCount() const {
+    int colorMapCount = m_colormaps.size();
+    return colorMapCount;
+}
+
+int ViewManager::getAnimatorCount() const {
+    int animatorCount = m_animators.size();
+    return animatorCount;
+}
+
+int ViewManager::getHistogramCount() const {
+    int histogramCount = m_histograms.size();
+    return histogramCount;
+}
+
+int ViewManager::getStatisticsCount() const {
+    int statisticsCount = m_statistics.size();
+    return statisticsCount;
 }
 
 QString ViewManager::_makeAnimator( int index ){
@@ -745,6 +798,109 @@ bool ViewManager::setColorMap( const QString& colormapId, const QString& colorma
     return colorMapFound;
 }
 
+bool ViewManager::reverseColorMap( const QString& colormapId, const QString& reverseStr ){
+    int colormapIndex = _findColorMap( colormapId );
+    bool colorMapFound = false;
+    if ( colormapIndex >= 0 ){
+        m_colormaps[colormapIndex]->reverseColormap( reverseStr );
+        colorMapFound = true;
+    }
+    return colorMapFound;
+}
+
+QString ViewManager::setCacheColormap( const QString& colormapId, const QString& cacheStr ){
+    QString output = "";
+    int colormapIndex = _findColorMap( colormapId );
+    if ( colormapIndex >= 0 ){
+        output = m_colormaps[colormapIndex]->setCacheColormap( cacheStr );
+    }
+    return output;
+}
+
+QString ViewManager::setCacheSize( const QString& colormapId, const QString& cacheSize ){
+    QString output = "";
+    int colormapIndex = _findColorMap( colormapId );
+    if ( colormapIndex >= 0 ){
+        output = m_colormaps[colormapIndex]->setCacheSize( cacheSize );
+    }
+    return output;
+}
+
+QString ViewManager::setInterpolatedColorMap( const QString& colormapId, const QString& interpolateStr ){
+    QString output = "";
+    int colormapIndex = _findColorMap( colormapId );
+    if ( colormapIndex >= 0 ){
+        output = m_colormaps[colormapIndex]->setInterpolatedColorMap( interpolateStr );
+    }
+    return output;
+}
+
+bool ViewManager::invertColorMap( const QString& colormapId, const QString& invertStr ){
+    int colormapIndex = _findColorMap( colormapId );
+    bool colorMapFound = false;
+    if ( colormapIndex >= 0 ){
+        m_colormaps[colormapIndex]->invertColorMap( invertStr );
+        colorMapFound = true;
+    }
+    return colorMapFound;
+}
+
+bool ViewManager::setColorMix( const QString& colormapId, const QString& percentString ){
+    int colormapIndex = _findColorMap( colormapId );
+    bool colorMapFound = false;
+    if ( colormapIndex >= 0 ){
+        QString output = m_colormaps[colormapIndex]->setColorMix( percentString );
+        colorMapFound = true;
+    }
+    return colorMapFound;
+}
+
+QString ViewManager::setGamma( const QString& colormapId, double gamma ){
+    QString output = "";
+    int colormapIndex = _findColorMap( colormapId );
+    if ( colormapIndex >= 0 ){
+        output = m_colormaps[colormapIndex]->setGamma( gamma );
+    }
+    return output;
+}
+
+QString ViewManager::setDataTransform( const QString& colormapId, const QString& transformString ){
+    QString output = "";
+    int colormapIndex = _findColorMap( colormapId );
+    if ( colormapIndex >= 0 ){
+        output = m_colormaps[colormapIndex]->setDataTransform( transformString );
+    }
+    return output;
+}
+
+bool ViewManager::setChannel( const QString& animatorId, int index ){
+    int animatorIndex = _findAnimator( animatorId );
+    bool animatorFound = false;
+    if ( animatorIndex >= 0 ){
+        m_animators[animatorIndex]->changeChannelIndex( index );
+        animatorFound = true;
+    }
+    return animatorFound;
+}
+
+bool ViewManager::setImage( const QString& animatorId, int index ){
+    int animatorIndex = _findAnimator( animatorId );
+    bool animatorFound = false;
+    if ( animatorIndex >= 0 ){
+        m_animators[animatorIndex]->changeImageIndex( index );
+        animatorFound = true;
+    }
+    return animatorFound;
+}
+
+void ViewManager::setCustomView( int rows, int cols ){
+    _clear();
+    if ( m_layout == nullptr ){
+        _makeLayout();
+    }
+    QString result = m_layout->setLayoutSize( rows, cols );
+}
+
 void ViewManager::setDeveloperView(){
     if ( m_layout == nullptr ){
         _makeLayout();
@@ -774,6 +930,401 @@ void ViewManager::setImageView(){
     m_layout->setLayoutImage();
 }
 
+//void ViewManager::setPlugins( const QStringList& names ){
+//    if ( m_layout == nullptr ){
+//        _makeLayout();
+//    }
+//    m_layout->setPlugins( names );
+//}
+
+void ViewManager::setClipValue( const QString& controlId, const QString& param ){
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+           m_controllers[i]->setClipValue( param );
+           break;
+        }
+    }
+}
+
+bool ViewManager::saveImage( const QString& controlId, const QString& filename ){
+    int controlCount = getControllerCount();
+    bool result = false;
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+           result = m_controllers[i]->saveImage( filename );
+           break;
+        }
+    }
+    return result;
+}
+
+bool ViewManager::saveFullImage( const QString& controlId, const QString& filename, double scale ){
+    int controlCount = getControllerCount();
+    bool result = false;
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+           result = m_controllers[i]->saveFullImage( filename, scale );
+           break;
+        }
+    }
+    return result;
+}
+
+QStringList ViewManager::getLinkedColorMaps( const QString& controlId ) {
+    QStringList linkedColorMaps;
+    int colormapCount = m_colormaps.size();
+    for ( int i = 0; i < colormapCount; i++ ){
+        QList<QString> oldLinks = m_colormaps[ i ]-> getLinks();
+        QString colormapId = getObjectId(Colormap::CLASS_NAME, i);
+        if (oldLinks.contains( controlId )) {
+            linkedColorMaps.append(colormapId);
+        }
+    }
+    return linkedColorMaps;
+}
+
+QStringList ViewManager::getLinkedAnimators( const QString& controlId ) {
+    QStringList linkedAnimators;
+    int animatorCount = m_animators.size();
+    for ( int i = 0; i < animatorCount; i++ ){
+        QList<QString> oldLinks = m_animators[ i ]-> getLinks();
+        QString animatorId = getObjectId(Animator::CLASS_NAME, i);
+        if (oldLinks.contains( controlId )) {
+            linkedAnimators.append(animatorId);
+        }
+    }
+    return linkedAnimators;
+}
+
+QStringList ViewManager::getLinkedHistograms( const QString& controlId ) {
+    QStringList linkedHistograms;
+    int histogramCount = m_histograms.size();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QList<QString> oldLinks = m_histograms[ i ]-> getLinks();
+        QString histogramId = getObjectId(Histogram::CLASS_NAME, i);
+        if (oldLinks.contains( controlId )) {
+            linkedHistograms.append(histogramId);
+        }
+    }
+    return linkedHistograms;
+}
+
+QStringList ViewManager::getLinkedStatistics( const QString& controlId ) {
+    QStringList linkedStatistics;
+    int statisticsCount = m_statistics.size();
+    for ( int i = 0; i < statisticsCount; i++ ){
+        QList<QString> oldLinks = m_statistics[ i ]-> getLinks();
+        QString statisticsId = getObjectId(Statistics::CLASS_NAME, i);
+        if (oldLinks.contains( controlId )) {
+            linkedStatistics.append(statisticsId);
+        }
+    }
+    return linkedStatistics;
+}
+
+QString ViewManager::centerOnPixel( const QString& controlId, double x, double y ) {
+    QString result = "";
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+            m_controllers[i]->centerOnPixel( x, y );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setZoomLevel( const QString& controlId, double zoomLevel ) {
+    QString result = "";
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+            m_controllers[i]->setZoomLevel( zoomLevel );
+            break;
+        }
+    }
+    return result;
+}
+
+double ViewManager::getZoomLevel( const QString& controlId ) {
+    double zoom;
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+            zoom = m_controllers[i]->getZoomLevel();
+            break;
+        }
+    }
+    return zoom;
+}
+
+QStringList ViewManager::getImageDimensions( const QString& controlId ) {
+    QStringList result;
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+            result = m_controllers[i]->getImageDimensions();
+            break;
+        }
+    }
+    return result;
+}
+
+QStringList ViewManager::getOutputSize( const QString& controlId ) {
+    QStringList result;
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+            result = m_controllers[i]->getOutputSize();
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::getIntensity( const QString& controlId, int frameLow, int frameHigh, double percentile ) {
+    QString result;
+    double intensity;
+    bool valid;
+    int controlCount = getControllerCount();
+    for ( int i = 0; i < controlCount; i++ ){
+        const QString controlPath= m_controllers[i]->getPath();
+        if ( controlId  == controlPath ){
+            valid = m_controllers[i]->getIntensity( frameLow, frameHigh, percentile, &intensity );
+            break;
+        }
+    }
+    if ( valid ) {
+        result = QString::number( intensity );
+    }
+    else {
+        result = Util::toString( valid );
+    }
+    return result;
+}
+
+QString ViewManager::setClipBuffer( const QString& histogramId, int bufferAmount ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setClipBuffer( bufferAmount );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setUseClipBuffer( const QString& histogramId, const QString& useBufferStr ){
+    QString result = "";
+    bool validBool = false;
+    bool useBuffer = Util::toBool( useBufferStr, &validBool );
+    if ( validBool || useBufferStr.toLower() == "toggle" ) {
+        int histogramCount = getHistogramCount();
+        for ( int i = 0; i < histogramCount; i++ ){
+            QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+            if ( histogramId == histogramPath ){
+                if ( useBufferStr.toLower() == "toggle" ) {
+                    bool currentUseBuffer = m_histograms[i]->getUseClipBuffer();
+                    useBuffer = !currentUseBuffer;
+                }
+                result = m_histograms[i]->setUseClipBuffer( useBuffer );
+                break;
+            }
+        }
+    }
+    else {
+        result = "Set clip buffer parameter must be true/false: " + useBufferStr;
+    }
+    return result;
+}
+
+QString ViewManager::setClipRange( const QString& histogramId, double minRange, double maxRange ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setClipRange( minRange, maxRange );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::applyClips( const QString& histogramId, double clipMinValue, double clipMaxValue, QString mode ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            if ( mode == "percent" ) {
+                result += m_histograms[i]->setClipMinPercent( clipMinValue );
+                result += m_histograms[i]->setClipMaxPercent( clipMaxValue );
+            }
+            else if ( mode == "intensity" ) {
+                result += m_histograms[i]->setClipMin( clipMinValue );
+                result += m_histograms[i]->setClipMax( clipMaxValue );
+            }
+            else {
+                result = "invalid mode: " + mode;
+                break;
+            }
+            m_histograms[i]->applyClips();
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setBinCount( const QString& histogramId, int binCount ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setBinCount( binCount );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setBinWidth( const QString& histogramId, double binWidth ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setBinWidth( binWidth );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setPlaneMode( const QString& histogramId, const QString& planeMode ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setPlaneMode( planeMode );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setPlaneRange( const QString& histogramId, double minPlane, double maxPlane ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setPlaneRange( minPlane, maxPlane );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setChannelUnit( const QString& histogramId, const QString& units ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setChannelUnit( units );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setGraphStyle( const QString& histogramId, const QString& style ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->setGraphStyle( style );
+            break;
+        }
+    }
+    return result;
+}
+
+QString ViewManager::setLogCount( const QString& histogramId, const QString& logCountStr ){
+    QString result = "";
+    bool validBool = false;
+    bool logCount = Util::toBool( logCountStr, &validBool );
+    if ( validBool || logCountStr.toLower() == "toggle" ) {
+        int histogramCount = getHistogramCount();
+        for ( int i = 0; i < histogramCount; i++ ){
+            QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+            if ( histogramId == histogramPath ){
+                if ( logCountStr.toLower() == "toggle" ) {
+                    bool currentLogCount = m_histograms[i]->getLogCount();
+                    logCount = !currentLogCount;
+                }
+                result = m_histograms[i]->setLogCount( logCount );
+                break;
+            }
+        }
+    }
+    else {
+        result = "Set log count parameter must be true/false: " + logCountStr;
+    }
+    return result;
+}
+
+QString ViewManager::setColored( const QString& histogramId, const QString& coloredStr ){
+    QString result = "";
+    bool validBool = false;
+    bool colored = Util::toBool( coloredStr, &validBool );
+    if ( validBool || coloredStr.toLower() == "toggle" ) {
+        int histogramCount = getHistogramCount();
+        for ( int i = 0; i < histogramCount; i++ ){
+            QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+            if ( histogramId == histogramPath ){
+                if ( coloredStr.toLower() == "toggle" ) {
+                    bool currentColored = m_histograms[i]->getColored();
+                    colored = !currentColored;
+                }
+                result = m_histograms[i]->setColored( colored );
+                break;
+            }
+        }
+    }
+    else {
+        result = "Set colored parameter must be true/false: " + coloredStr;
+    }
+    return result;
+}
+
+QString ViewManager::saveHistogram( const QString& histogramId, const QString& filename, int width, int height ){
+    QString result = "";
+    int histogramCount = getHistogramCount();
+    for ( int i = 0; i < histogramCount; i++ ){
+        QString histogramPath = getObjectId(Histogram::CLASS_NAME, i);
+        if ( histogramId == histogramPath ){
+            result = m_histograms[i]->saveHistogram( filename, width, height );
+            break;
+        }
+    }
+    return result;
+}
 
 QString ViewManager::saveState( const QString& sessionId, const QString& saveName, bool saveLayout, bool savePreferences, bool saveData ){
     QString result;

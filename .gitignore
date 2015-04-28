@@ -15,3 +15,12 @@
 
 # git mergetool byproducts
 *.orig
+
+# emacs backup files
+*~
+
+# python byproducts
+*.pyc
+
+# vi backup files
+*.swp
