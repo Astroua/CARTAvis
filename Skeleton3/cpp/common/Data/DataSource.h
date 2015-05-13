@@ -39,6 +39,14 @@ namespace Carta {
 }
 
 namespace Carta {
+    namespace Core {
+        namespace ScriptedClient {
+            class ScriptedRenderService;
+        }
+    }
+}
+
+namespace Carta {
 
 namespace Data {
 
@@ -272,14 +280,17 @@ public:
     void render();
 
     /**
-     * Save a copy of the full image in the current image view at its native resolution.
+     * Save a copy of the full image in the current image view at its native
+     * resolution.
      * @param fileName the full path where the file is to be saved.
      * @param scale the scale (zoom level) of the saved image.
      * @return an error message if there was a problem saving the image;
      *      an empty string otherwise.
-     * [NOTE: this method has been temporarily disabled, so will always return false.]
+     * [NOTE: this method still returns false because I don't yet know how to
+     * access the return value from the QImage save() method, which is being
+     * used inside a Qt slot.]
      */
-    bool saveFullImage( const QString& filename, double scale );
+    bool saveFullImage( const QString& savename, double scale );
 
     virtual ~DataSource();
 
@@ -330,6 +341,8 @@ private:
 
     ///pixel pipeline
     std::shared_ptr<Carta::Lib::PixelPipeline::CustomizablePixelPipeline> m_pixelPipeline;
+
+    Carta::Core::ScriptedClient::ScriptedRenderService *m_scriptedRenderService;
     
     DataSource(const DataSource& other);
     DataSource operator=(const DataSource& other);
