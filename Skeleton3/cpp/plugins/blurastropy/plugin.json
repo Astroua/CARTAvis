@@ -1,0 +1,8 @@
+{
+    "name"       : "blurastropy",
+    "version"    : "0.0.1",
+    "type"       : "python",
+    "description": "try to blur something astropy in pytho",
+    "about"      : "Part of carta. Written by Erik",
+    "depends"    : [ "python273" ]
+}
