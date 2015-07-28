@@ -5,10 +5,7 @@ from __future__ import print_function
 
 print("hello from blurastropy.py")
 
-from scipy import ndimage
-import scipy
 import numpy as np
-from random import randrange
 from astropy.convolution import convolve_fft, Gaussian2DKernel
 
 def no_preRenderHook(w, h, data):
