@@ -9,12 +9,16 @@
 #include <QPainter>
 #include <QTime>
 
+
+
 typedef Carta::Lib::LinearMap1D LinMap;
 namespace VG = Carta::Lib::VectorGraphics; // love c++11
 namespace VGE = VG::Entries;
 
 namespace WcsPlotterPluginNS
 {
+
+
 struct AstWcsGridRenderService::Pimpl
 {
     // we want to remember index and size about fonts
@@ -250,6 +254,10 @@ AstWcsGridRenderService::renderNow()
         if ( !m_ticks ){
             _turnOffTicks(&sgp);
         }
+        else {
+            sgp.setPlotOption(QString("MinTickLen(1)=%1").arg( m_tickLength ));
+            sgp.setPlotOption(QString("MinTickLen(2)=%2").arg( m_tickLength ));
+        }
     }
 
     if ( m_internalLabels ) {
@@ -263,16 +271,29 @@ AstWcsGridRenderService::renderNow()
     sgp.setPlotOption( "LabelUp(2)=0" ); // align labels to axes
     sgp.setPlotOption( "Size=9" ); // default font
 
-    //Turn axis labelling off if we are not drawing the axes.
+    //Turn axis  labelling off if we are not drawing the axes.
     if (m_axes){
-        sgp.setPlotOption( "TextLab(1)=1" );
-        sgp.setPlotOption( "TextLab(2)=1" );
+        int labelCount = m_labels.size();
+        for ( int i = 0; i < labelCount; i++ ){
+            int axisIndex = i+ 1;
+            sgp.setPlotOption( QString("TextLab(%1)=1").arg(axisIndex) );
+            if ( m_labels[i].length() > 0 ){
+                sgp.setPlotOption( QString("Label(%1)=%2")
+                        .arg(axisIndex).arg( m_labels[i]) );
+            }
+            if ( m_labelFormats[i].length() > 0 ){
+                sgp.setPlotOption( QString("Format(%1)=%2")
+                        .arg(axisIndex).arg( m_labelFormats[i]) );
+            }
+            if ( m_labelLocations[i].length() > 0 ){
+                sgp.setPlotOption( QString("Edge(%1)=%2")
+                        .arg(axisIndex).arg( m_labelLocations[i]) );
+            }
+        }
     }
     else {
-        sgp.setPlotOption( "TextLab(1)=0");
-        sgp.setPlotOption( "TextLab(2)=0");
-        sgp.setPlotOption( "NumLab(1) = 0");
-        sgp.setPlotOption( "NumLab(2) = 0");
+        _turnOffLabels( &sgp, 1 );
+        _turnOffLabels( &sgp, 2 );
     }
 
     // fonts
@@ -426,6 +447,35 @@ AstWcsGridRenderService::setPen( Carta::Lib::IWcsGridRenderService::Element e, c
     }
 } // setPen
 
+void
+AstWcsGridRenderService::setAxisLabel( int axisIndex, const QString& label ){
+    CARTA_ASSERT( axisIndex == 0 || axisIndex ==1 );
+    CARTA_ASSERT( !label.isEmpty() );
+    if ( m_labels[axisIndex] != label ){
+        m_vgValid = false;
+        m_labels[axisIndex] = label;
+    }
+}
+
+void
+AstWcsGridRenderService::setAxisLabelLocation( int axisIndex, const QString& edge ){
+    CARTA_ASSERT( axisIndex == 0 || axisIndex ==1 );
+    CARTA_ASSERT( edge == "top" || edge == "bottom" || edge =="left" || edge=="right" || edge=="");
+    if ( m_labelLocations[axisIndex] != edge ){
+        m_vgValid = false;
+        m_labelLocations[axisIndex] = edge;
+    }
+}
+
+void
+AstWcsGridRenderService::setAxisLabelFormat( int axisIndex, const QString& formatStr ){
+    CARTA_ASSERT( axisIndex == 0 || axisIndex == 1 );
+    if ( m_labelFormats[axisIndex] != formatStr ){
+        m_vgValid = false;
+        m_labelFormats[axisIndex] = formatStr;
+    }
+}
+
 //const QPen &
 //AstWcsGridRenderService::pen( Carta::Lib::IWcsGridRenderService::Element e )
 //{
@@ -461,6 +511,16 @@ AstWcsGridRenderService::setEmptyGrid( bool flag )
 }
 
 void
+AstWcsGridRenderService::setTickLength( double length )
+{
+    CARTA_ASSERT( length >= 0 );
+    if ( m_tickLength != length ){
+        m_vgValid = false;
+        m_tickLength = length;
+    }
+}
+
+void
 AstWcsGridRenderService::setTicksVisible( bool flag )
 {
     if ( m_ticks != flag ){
@@ -481,5 +541,10 @@ AstWcsGridRenderService::_turnOffTicks(WcsPlotterPluginNS::AstGridPlotter* sgp){
     sgp->setPlotOption("MajTickLen(2)=0");
     sgp->setPlotOption("MinTickLen(1)=0");
     sgp->setPlotOption("MinTickLen(2)=0");
+}
+
+void AstWcsGridRenderService::_turnOffLabels( WcsPlotterPluginNS::AstGridPlotter* sgp, int index ){
+    sgp->setPlotOption( QString("TextLab(%1)=0").arg(index));
+    sgp->setPlotOption( QString("NumLab(%1)=0").arg(index));
 }
 }

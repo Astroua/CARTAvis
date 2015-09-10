@@ -349,8 +349,6 @@ private:
 
     double _getBufferedIntensity( const QString& clipKey, const QString& percentKey );
     std::pair<int,int> _getFrameBounds() const;
-    double _getPercentile( const QString& fileName, int frameIndex, double intensity ) const;
-    bool _getIntensity( const QString& fileName, int frameIndex, double percentile, double* intensity ) const;
     Controller* _getControllerSelected() const;
     void _loadData( Controller* controller);
 
@@ -401,10 +399,10 @@ private:
     void _initializeStatics();
 
     void _refreshView();
-    void _resetBinCountBasedOnWidth();
+    bool _resetBinCountBasedOnWidth();
     void _resetDefaultStateData();
 
-    void _zoomToSelection();
+    QString _zoomToSelection();
 
     static bool m_registered;
 
@@ -420,6 +418,8 @@ private:
     const static QString CLIP_APPLY;
     const static QString CUSTOM_CLIP;
     const static QString BIN_COUNT;
+    const static QString BIN_COUNT_MAX;
+    const static int BIN_COUNT_MAX_VALUE;
     const static QString BIN_WIDTH;
     const static QString COLOR_MIN;
     const static QString COLOR_MAX;
