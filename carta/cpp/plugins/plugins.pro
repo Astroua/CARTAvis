@@ -13,6 +13,4 @@ SUBDIRS += CasaImageLoader
 SUBDIRS += Colormaps1
 SUBDIRS += Histogram
 SUBDIRS += WcsPlotter
-
-
-
+SUBDIRS += cartaview

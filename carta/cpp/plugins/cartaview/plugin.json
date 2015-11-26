@@ -1,0 +1,8 @@
+{
+    "name"       : "cartaview",
+    "version"    : "0.1",
+    "type"       : "lib",
+    "description": "adds libraries needed for running carta in casa",
+    "about"      : "Written by Jeff Taylor",
+    "depends"    : []
+}
